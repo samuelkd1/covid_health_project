@@ -1,0 +1,36 @@
+---
+title: "WHO"
+output: html_document
+---
+```{r}
+library(writexl)
+library(tidyverse)
+library(readxl)
+library(here)
+library(janitor)
+library(lubridate)
+
+```
+
+```{r}
+(excel_file <- read_xlsx("maternal_mortality_dataset.xlsx", skip = 1))
+```
+
+```{r}
+excel_file %>% remove_empty() -> excel_file
+```
+
+```{r}
+excel_file %>% select(-c(contains("Indicator"), ValueType, DateModified, Language, `Period type`,`Location type`,IsLatestYear, Value)) %>%
+  clean_names() %>%
+  rename("continent_code" = parent_location_code, "continent" = parent_location, "country_code" = spatial_dim_value_code, "year" = period, "value" = "fact_value_numeric", "value_low" = fact_value_numeric_low, "value_high" = fact_value_numeric_high) -> excel_file
+```
+
+```{r}
+excel_file %>% mutate(year = parse_date(year, format = "%Y")) -> excel_file
+```
+
+```{r}
+write_xlsx(excel_file, "maternal_mortality_dataset_clean")
+```
+
